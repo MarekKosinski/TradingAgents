@@ -36,7 +36,13 @@ from tradingagents.agents.utils.agent_utils import (
     get_income_statement,
     get_news,
     get_insider_transactions,
-    get_global_news
+    get_global_news,
+    get_options_expirations,
+    get_options_chain,
+    get_put_call_ratio,
+    get_unusual_options_activity,
+    get_iv_analysis,
+    get_short_squeeze_data,
 )
 
 from .checkpointer import checkpoint_step, clear_checkpoint, get_checkpointer, thread_id
@@ -52,7 +58,7 @@ class TradingAgentsGraph:
 
     def __init__(
         self,
-        selected_analysts=["market", "social", "news", "fundamentals"],
+        selected_analysts=["market", "social", "news", "fundamentals", "options_squeeze"],
         debug=False,
         config: Dict[str, Any] = None,
         callbacks: Optional[List] = None,
@@ -186,6 +192,17 @@ class TradingAgentsGraph:
                     get_balance_sheet,
                     get_cashflow,
                     get_income_statement,
+                ]
+            ),
+            "options_squeeze": ToolNode(
+                [
+                    # Options & squeeze analysis tools
+                    get_options_expirations,
+                    get_options_chain,
+                    get_put_call_ratio,
+                    get_unusual_options_activity,
+                    get_iv_analysis,
+                    get_short_squeeze_data,
                 ]
             ),
         }
@@ -389,6 +406,7 @@ class TradingAgentsGraph:
             "sentiment_report": final_state["sentiment_report"],
             "news_report": final_state["news_report"],
             "fundamentals_report": final_state["fundamentals_report"],
+            "options_squeeze_report": final_state.get("options_squeeze_report", ""),
             "investment_debate_state": {
                 "bull_history": final_state["investment_debate_state"]["bull_history"],
                 "bear_history": final_state["investment_debate_state"]["bear_history"],
