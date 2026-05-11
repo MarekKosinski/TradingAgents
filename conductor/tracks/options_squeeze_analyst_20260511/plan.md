@@ -14,17 +14,17 @@ This plan adds a 5th analyst agent to the TradingAgents pipeline in 6 phases, pr
 
 Tasks:
 
-- [ ] Task 1.1: Create `tests/test_options_dataflows.py` with test for `get_options_expirations` — mock `yf.Ticker` to return a list of expiration date strings; assert formatted output includes header and dates. Then implement `tradingagents/dataflows/y_finance_options.py::get_options_expirations`. (TDD: Write test with mocked yfinance, implement function, verify format matches existing dataflow conventions.)
+- [x] Task 1.1: Create `tests/test_options_dataflows.py` with test for `get_options_expirations` — mock `yf.Ticker` to return a list of expiration date strings; assert formatted output includes header and dates. Then implement `tradingagents/dataflows/y_finance_options.py::get_options_expirations`. (TDD: Write test with mocked yfinance, implement function, verify format matches existing dataflow conventions.) [31a8c4a]
 
-- [ ] Task 1.2: Test and implement `get_options_chain(ticker, expiration_date)` — mock `ticker.option_chain(date)` returning DataFrames with calls/puts columns (strike, lastPrice, bid, ask, volume, openInterest, impliedVolatility). Assert output is header + CSV string. Handle empty chain gracefully. (TDD: Red — test expects CSV output with header; Green — implement with `yf_retry`; Refactor — extract common formatting if needed.)
+- [x] Task 1.2: Test and implement `get_options_chain(ticker, expiration_date)` — mock `ticker.option_chain(date)` returning DataFrames with calls/puts columns (strike, lastPrice, bid, ask, volume, openInterest, impliedVolatility). Assert output is header + CSV string. Handle empty chain gracefully. (TDD: Red — test expects CSV output with header; Green — implement with `yf_retry`; Refactor — extract common formatting if needed.) [31a8c4a]
 
-- [ ] Task 1.3: Test and implement `get_put_call_ratio(ticker)` — mock `ticker.options` (2 expirations) and `ticker.option_chain` for each. Assert volume-weighted and OI-weighted ratios are computed correctly. Test edge case: zero total call volume returns "insufficient data". (TDD: Red — test with known volumes expects specific ratios; Green — implement aggregation logic; Refactor.)
+- [x] Task 1.3: Test and implement `get_put_call_ratio(ticker)` — mock `ticker.options` (2 expirations) and `ticker.option_chain` for each. Assert volume-weighted and OI-weighted ratios are computed correctly. Test edge case: zero total call volume returns "insufficient data". (TDD: Red — test with known volumes expects specific ratios; Green — implement aggregation logic; Refactor.) [31a8c4a]
 
-- [ ] Task 1.4: Test and implement `get_unusual_options_activity(ticker, volume_oi_threshold=3.0)` — mock chain data with some contracts having volume/OI > 3.0 and some below. Assert only contracts above threshold are returned, sorted by ratio descending, limited to 10. Test with no unusual activity returns informative message. (TDD: Red — test asserts top-N filtering; Green — implement; Refactor.)
+- [x] Task 1.4: Test and implement `get_unusual_options_activity(ticker, volume_oi_threshold=3.0)` — mock chain data with some contracts having volume/OI > 3.0 and some below. Assert only contracts above threshold are returned, sorted by ratio descending, limited to 10. Test with no unusual activity returns informative message. (TDD: Red — test asserts top-N filtering; Green — implement; Refactor.) [31a8c4a]
 
-- [ ] Task 1.5: Test and implement `get_iv_analysis(ticker)` — mock chain with known IV values across strikes. Assert ATM IV identification (strike nearest current price), OTM put vs OTM call IV skew calculation, and min/max IV range. Test sparse chain (few strikes) returns partial analysis. (TDD: Red — test expects specific ATM IV and skew direction; Green — implement; Refactor.)
+- [x] Task 1.5: Test and implement `get_iv_analysis(ticker)` — mock chain with known IV values across strikes. Assert ATM IV identification (strike nearest current price), OTM put vs OTM call IV skew calculation, and min/max IV range. Test sparse chain (few strikes) returns partial analysis. (TDD: Red — test expects specific ATM IV and skew direction; Green — implement; Refactor.) [31a8c4a]
 
-- [ ] Verification: Run `pytest tests/test_options_dataflows.py -v` and confirm all 5+ tests pass with mocked yfinance. Manually verify one function against live yfinance for a liquid ticker (AAPL or SPY) to sanity-check format. [checkpoint marker]
+- [x] Verification: Run `pytest tests/test_options_dataflows.py -v` and confirm all 5+ tests pass with mocked yfinance. Manually verify one function against live yfinance for a liquid ticker (AAPL or SPY) to sanity-check format. [checkpoint marker] [31a8c4a]
 
 ---
 
@@ -34,13 +34,13 @@ Tasks:
 
 Tasks:
 
-- [ ] Task 2.1: Create `tests/test_squeeze_dataflows.py` with test for `get_short_squeeze_data(ticker)` — mock `ticker.info` returning dict with `shortPercentOfFloat`, `shortRatio`, `sharesShort`, `sharesShortPriorMonth`, `floatShares`, `sharesOutstanding`, `heldPercentInstitutions`, `heldPercentInsiders`. Assert all fields appear in output. Assert month-over-month change is computed correctly (e.g., shares short increased 15%). (TDD: Red — test expects formatted report with all metrics; Green — implement in `y_finance_options.py`; Refactor.)
+- [x] Task 2.1: Create `tests/test_squeeze_dataflows.py` with test for `get_short_squeeze_data(ticker)` — mock `ticker.info` returning dict with `shortPercentOfFloat`, `shortRatio`, `sharesShort`, `sharesShortPriorMonth`, `floatShares`, `sharesOutstanding`, `heldPercentInstitutions`, `heldPercentInsiders`. Assert all fields appear in output. Assert month-over-month change is computed correctly (e.g., shares short increased 15%). (TDD: Red — test expects formatted report with all metrics; Green — implement in `y_finance_options.py`; Refactor.) [31a8c4a]
 
-- [ ] Task 2.2: Test squeeze score calculation — test with high-squeeze scenario (shortPercentOfFloat=0.35, shortRatio=8.5, rising short interest, low float) expects "Extreme" rating. Test with low-squeeze scenario (shortPercentOfFloat=0.02, shortRatio=1.0) expects "Low" rating. Test with partially missing fields (some None) still produces report without crashing. (TDD: Red — test expects specific ratings; Green — implement scoring logic; Refactor — extract thresholds to module-level constants.)
+- [x] Task 2.2: Test squeeze score calculation — test with high-squeeze scenario (shortPercentOfFloat=0.35, shortRatio=8.5, rising short interest, low float) expects "Extreme" rating. Test with low-squeeze scenario (shortPercentOfFloat=0.02, shortRatio=1.0) expects "Low" rating. Test with partially missing fields (some None) still produces report without crashing. (TDD: Red — test expects specific ratings; Green — implement scoring logic; Refactor — extract thresholds to module-level constants.) [31a8c4a]
 
-- [ ] Task 2.3: Test edge case — mock `ticker.info` returning empty dict or None. Assert function returns graceful "No short interest data available" message. (TDD: Red — test with empty info; Green — add guard clause; Refactor.)
+- [x] Task 2.3: Test edge case — mock `ticker.info` returning empty dict or None. Assert function returns graceful "No short interest data available" message. (TDD: Red — test with empty info; Green — add guard clause; Refactor.) [31a8c4a]
 
-- [ ] Verification: Run `pytest tests/test_squeeze_dataflows.py -v` and confirm all tests pass. [checkpoint marker]
+- [x] Verification: Run `pytest tests/test_squeeze_dataflows.py -v` and confirm all tests pass. [checkpoint marker] [31a8c4a]
 
 ---
 
