@@ -1,18 +1,40 @@
+import json
+import os
+
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
-# DEFAULT_CONFIG already applies TRADINGAGENTS_* env-var overrides
-# (llm_provider, deep_think_llm, quick_think_llm, backend_url, etc.),
-# so users can switch models or endpoints purely via .env without
-# editing this script. Override individual keys here only when you
-# want a hard-coded value that should ignore the environment.
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Use Claude Code's OAuth token from subscription (no API billing)
+creds_path = os.path.expanduser("~/.claude/.credentials.json")
+with open(creds_path) as f:
+    creds = json.load(f)
+os.environ["ANTHROPIC_API_KEY"] = creds["claudeAiOauth"]["accessToken"]
+
+# Create a custom config
 config = DEFAULT_CONFIG.copy()
+config["llm_provider"] = "anthropic"
+config["deep_think_llm"] = "claude-sonnet-4-20250514"
+config["quick_think_llm"] = "claude-sonnet-4-20250514"
+config["max_debate_rounds"] = 1
+
+# Configure data vendors (default uses yfinance, no extra API keys needed)
+config["data_vendors"] = {
+    "core_stock_apis": "yfinance",           # Options: alpha_vantage, yfinance
+    "technical_indicators": "yfinance",      # Options: alpha_vantage, yfinance
+    "fundamental_data": "yfinance",          # Options: alpha_vantage, yfinance
+    "news_data": "yfinance",                 # Options: alpha_vantage, yfinance
+}
 
 # Initialize with custom config
 ta = TradingAgentsGraph(debug=True, config=config)
 
 # forward propagate
-_, decision = ta.propagate("NVDA", "2024-05-10")
+_, decision = ta.propagate("OPEN", "2026-05-04")
 print(decision)
 
 # Memorize mistakes and reflect
