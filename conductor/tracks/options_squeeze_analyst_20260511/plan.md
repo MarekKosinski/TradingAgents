@@ -112,17 +112,17 @@ Tasks:
 
 Tasks:
 
-- [ ] Task 6.1: Update bull researcher prompt — add `options_squeeze_report` to the context variables. Add "Options flow and short squeeze analysis: {options_squeeze_report}" to the resources section. Test by checking the prompt string contains the new variable reference. (TDD: Red — test prompt includes "options_squeeze_report"; Green — update `bull_researcher.py`; Refactor.)
+- [x] Task 6.1: Update bull researcher prompt — add `options_squeeze_report` to the context variables. Add "Options flow and short squeeze analysis: {options_squeeze_report}" to the resources section. Test by checking the prompt string contains the new variable reference. (TDD: Red — test prompt includes "options_squeeze_report"; Green — update `bull_researcher.py`; Refactor.) [9c7a566]
 
-- [ ] Task 6.2: Update bear researcher prompt — same pattern as bull. Add options/squeeze report to context. Test prompt content. (TDD: Red — test prompt; Green — update `bear_researcher.py`; Refactor.)
+- [x] Task 6.2: Update bear researcher prompt — same pattern as bull. Add options/squeeze report to context. Test prompt content. (TDD: Red — test prompt; Green — update `bear_researcher.py`; Refactor.) [9c7a566]
 
-- [ ] Task 6.3: Update trader prompt — add mention of options and short squeeze insights in the system message context. The trader receives the investment_plan which already synthesizes all reports, but the system prompt should acknowledge this data dimension exists. Test prompt content. (TDD: Red — test system message mentions options; Green — update `trader.py`; Refactor.)
+- [x] Task 6.3: Update trader prompt — add mention of options and short squeeze insights in the system message context. The trader receives the investment_plan which already synthesizes all reports, but the system prompt should acknowledge this data dimension exists. Test prompt content. (TDD: Red — test system message mentions options; Green — update `trader.py`; Refactor.) [9c7a566]
 
-- [ ] Task 6.4: Ensure graceful handling of empty report — test that when `options_squeeze_report` is empty string (analyst not selected), the bull/bear researcher prompts still read naturally (no "None" or error text in prompt). (TDD: Red — test with empty report; Green — verify f-string handles empty gracefully; Refactor.)
+- [x] Task 6.4: Ensure graceful handling of empty report — test that when `options_squeeze_report` is empty string (analyst not selected), the bull/bear researcher prompts still read naturally (no "None" or error text in prompt). (TDD: Red — test with empty report; Green — verify f-string handles empty gracefully; Refactor.) [9c7a566]
 
-- [ ] Task 6.5: End-to-end smoke test — create an integration test that instantiates `TradingAgentsGraph` with all 5 analysts using fully mocked LLMs and mocked yfinance. Invoke `propagate("AAPL", "2026-05-09")` and assert the final state contains non-empty `options_squeeze_report` and `final_trade_decision`. (TDD: Red — test full pipeline; Green — verify all wiring works; Refactor.)
+- [x] Task 6.5: End-to-end smoke test — create an integration test that instantiates `TradingAgentsGraph` with all 5 analysts using fully mocked LLMs and mocked yfinance. Invoke `propagate("AAPL", "2026-05-09")` and assert the final state contains non-empty `options_squeeze_report` and `final_trade_decision`. (TDD: Red — test full pipeline; Green — verify all wiring works; Refactor.) [9c7a566]
 
-- [ ] Verification: Run `pytest tests/ -v --tb=short`. All tests pass. Run `python -c "from tradingagents.graph.trading_graph import TradingAgentsGraph; g = TradingAgentsGraph(); print('OK')"` with mocked LLM to verify import chain is clean. [checkpoint marker]
+- [x] Verification: Run `pytest tests/ -v --tb=short`. All tests pass (284 passed, 1 skipped). Import chain verified clean. [checkpoint marker] [9c7a566]
 
 ---
 
