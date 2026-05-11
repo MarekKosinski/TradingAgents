@@ -50,17 +50,17 @@ Tasks:
 
 Tasks:
 
-- [ ] Task 3.1: Test interface registration — in `tests/test_options_dataflows.py` (or new file `tests/test_options_interface.py`), test that `get_category_for_method("get_options_chain")` returns `"options_squeeze_data"`, and that `VENDOR_METHODS["get_options_chain"]["yfinance"]` points to the correct function. Repeat for all 6 new methods. Then update `interface.py`: add imports from `y_finance_options`, add `"options_squeeze_data"` to `TOOLS_CATEGORIES`, add all methods to `VENDOR_METHODS`. (TDD: Red — import and assert category/vendor mapping; Green — add registrations; Refactor.)
+- [x] Task 3.1: Test interface registration — in `tests/test_options_dataflows.py` (or new file `tests/test_options_interface.py`), test that `get_category_for_method("get_options_chain")` returns `"options_squeeze_data"`, and that `VENDOR_METHODS["get_options_chain"]["yfinance"]` points to the correct function. Repeat for all 6 new methods. Then update `interface.py`: add imports from `y_finance_options`, add `"options_squeeze_data"` to `TOOLS_CATEGORIES`, add all methods to `VENDOR_METHODS`. (TDD: Red — import and assert category/vendor mapping; Green — add registrations; Refactor.) [8c83a2a]
 
-- [ ] Task 3.2: Update `default_config.py` — add `"options_squeeze_data": "yfinance"` to `data_vendors`. Test that `get_config()["data_vendors"]["options_squeeze_data"]` returns `"yfinance"`. (TDD: Red — test config key exists; Green — add to DEFAULT_CONFIG; Refactor.)
+- [x] Task 3.2: Update `default_config.py` — add `"options_squeeze_data": "yfinance"` to `data_vendors`. Test that `get_config()["data_vendors"]["options_squeeze_data"]` returns `"yfinance"`. (TDD: Red — test config key exists; Green — add to DEFAULT_CONFIG; Refactor.) [8c83a2a]
 
-- [ ] Task 3.3: Create `tradingagents/agents/utils/options_squeeze_tools.py` — test that each `@tool` function exists, is callable, and has a docstring. Then implement 5 tools (`get_options_chain`, `get_put_call_ratio`, `get_unusual_options_activity`, `get_iv_analysis`, `get_short_squeeze_data`) all calling `route_to_vendor()`. Also add `get_options_expirations` as a 6th tool. (TDD: Red — import and assert tool attributes; Green — implement `@tool` wrappers; Refactor.)
+- [x] Task 3.3: Create `tradingagents/agents/utils/options_squeeze_tools.py` — test that each `@tool` function exists, is callable, and has a docstring. Then implement 5 tools (`get_options_chain`, `get_put_call_ratio`, `get_unusual_options_activity`, `get_iv_analysis`, `get_short_squeeze_data`) all calling `route_to_vendor()`. Also add `get_options_expirations` as a 6th tool. (TDD: Red — import and assert tool attributes; Green — implement `@tool` wrappers; Refactor.) [8c83a2a]
 
-- [ ] Task 3.4: Test tool routing end-to-end — mock the yfinance backend, call each tool function, assert it routes through `route_to_vendor` and returns expected data format. (TDD: Red — call tool, assert output; Green — verify routing works; Refactor.)
+- [x] Task 3.4: Test tool routing end-to-end — mock the yfinance backend, call each tool function, assert it routes through `route_to_vendor` and returns expected data format. (TDD: Red — call tool, assert output; Green — verify routing works; Refactor.) [8c83a2a]
 
-- [ ] Task 3.5: Update `agent_utils.py` — add imports of all new tools so they are available from the central utility module (matching how existing tools are imported there). Test import. (TDD: Red — test `from tradingagents.agents.utils.agent_utils import get_options_chain`; Green — add imports; Refactor.)
+- [x] Task 3.5: Update `agent_utils.py` — add imports of all new tools so they are available from the central utility module (matching how existing tools are imported there). Test import. (TDD: Red — test `from tradingagents.agents.utils.agent_utils import get_options_chain`; Green — add imports; Refactor.) [8c83a2a]
 
-- [ ] Verification: Run `pytest tests/test_options_interface.py tests/test_options_dataflows.py -v`. Verify all tools can be imported from `agent_utils`. [checkpoint marker]
+- [x] Verification: Run `pytest tests/test_options_interface.py tests/test_options_dataflows.py -v`. Verify all tools can be imported from `agent_utils`. [checkpoint marker] [8c83a2a]
 
 ---
 
