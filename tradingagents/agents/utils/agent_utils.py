@@ -18,6 +18,14 @@ from tradingagents.agents.utils.news_data_tools import (
     get_insider_transactions,
     get_global_news
 )
+from tradingagents.agents.utils.options_squeeze_tools import (
+    get_options_expirations,
+    get_options_chain,
+    get_put_call_ratio,
+    get_unusual_options_activity,
+    get_iv_analysis,
+    get_short_squeeze_data,
+)
 
 
 def get_language_instruction() -> str:

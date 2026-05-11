@@ -22,6 +22,14 @@ from .alpha_vantage import (
     get_news as get_alpha_vantage_news,
     get_global_news as get_alpha_vantage_global_news,
 )
+from .y_finance_options import (
+    get_options_expirations as get_yfinance_options_expirations,
+    get_options_chain as get_yfinance_options_chain,
+    get_put_call_ratio as get_yfinance_put_call_ratio,
+    get_unusual_options_activity as get_yfinance_unusual_options_activity,
+    get_iv_analysis as get_yfinance_iv_analysis,
+    get_short_squeeze_data as get_yfinance_short_squeeze_data,
+)
 from .alpha_vantage_common import AlphaVantageRateLimitError
 
 # Configuration and routing logic
@@ -56,6 +64,17 @@ TOOLS_CATEGORIES = {
             "get_news",
             "get_global_news",
             "get_insider_transactions",
+        ]
+    },
+    "options_squeeze_data": {
+        "description": "Options chain and short squeeze data",
+        "tools": [
+            "get_options_expirations",
+            "get_options_chain",
+            "get_put_call_ratio",
+            "get_unusual_options_activity",
+            "get_iv_analysis",
+            "get_short_squeeze_data",
         ]
     }
 }
@@ -106,6 +125,25 @@ VENDOR_METHODS = {
     "get_insider_transactions": {
         "alpha_vantage": get_alpha_vantage_insider_transactions,
         "yfinance": get_yfinance_insider_transactions,
+    },
+    # options_squeeze_data
+    "get_options_expirations": {
+        "yfinance": get_yfinance_options_expirations,
+    },
+    "get_options_chain": {
+        "yfinance": get_yfinance_options_chain,
+    },
+    "get_put_call_ratio": {
+        "yfinance": get_yfinance_put_call_ratio,
+    },
+    "get_unusual_options_activity": {
+        "yfinance": get_yfinance_unusual_options_activity,
+    },
+    "get_iv_analysis": {
+        "yfinance": get_yfinance_iv_analysis,
+    },
+    "get_short_squeeze_data": {
+        "yfinance": get_yfinance_short_squeeze_data,
     },
 }
 
