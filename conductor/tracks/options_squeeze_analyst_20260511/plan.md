@@ -70,15 +70,15 @@ Tasks:
 
 Tasks:
 
-- [ ] Task 4.1: Test agent creation — in `tests/test_options_squeeze_agent.py`, test that `create_options_squeeze_analyst(mock_llm)` returns a callable. Call it with a minimal state dict (messages, trade_date, company_of_interest). Assert result dict contains `"messages"` and `"options_squeeze_report"` keys. (TDD: Red — test callable and return shape; Green — create `tradingagents/agents/analysts/options_squeeze_analyst.py` with skeleton; Refactor.)
+- [x] Task 4.1: Test agent creation — in `tests/test_options_squeeze_agent.py`, test that `create_options_squeeze_analyst(mock_llm)` returns a callable. Call it with a minimal state dict (messages, trade_date, company_of_interest). Assert result dict contains `"messages"` and `"options_squeeze_report"` keys. (TDD: Red — test callable and return shape; Green — create `tradingagents/agents/analysts/options_squeeze_analyst.py` with skeleton; Refactor.) [33ffa10]
 
-- [ ] Task 4.2: Test agent prompt construction — mock LLM to capture the prompt. Assert system message mentions options chain, put/call ratio, unusual activity, IV analysis, short squeeze. Assert tool names include all 6 tools. Assert current_date and instrument_context are injected. (TDD: Red — test prompt content assertions; Green — implement full prompt; Refactor.)
+- [x] Task 4.2: Test agent prompt construction — mock LLM to capture the prompt. Assert system message mentions options chain, put/call ratio, unusual activity, IV analysis, short squeeze. Assert tool names include all 6 tools. Assert current_date and instrument_context are injected. (TDD: Red — test prompt content assertions; Green — implement full prompt; Refactor.) [33ffa10]
 
-- [ ] Task 4.3: Test agent report extraction — mock LLM returning AIMessage with no tool_calls and content = "Options report...". Assert `options_squeeze_report` in result equals the content. Mock LLM returning AIMessage with tool_calls. Assert `options_squeeze_report` is empty string (tool loop continues). (TDD: Red — test both branches; Green — implement conditional report extraction; Refactor.)
+- [x] Task 4.3: Test agent report extraction — mock LLM returning AIMessage with no tool_calls and content = "Options report...". Assert `options_squeeze_report` in result equals the content. Mock LLM returning AIMessage with tool_calls. Assert `options_squeeze_report` is empty string (tool loop continues). (TDD: Red — test both branches; Green — implement conditional report extraction; Refactor.) [33ffa10]
 
-- [ ] Task 4.4: Register agent in `__init__.py` — add `from .analysts.options_squeeze_analyst import create_options_squeeze_analyst` to `tradingagents/agents/__init__.py` and `__all__`. Test import from package. (TDD: Red — test import; Green — add to __init__.py; Refactor.)
+- [x] Task 4.4: Register agent in `__init__.py` — add `from .analysts.options_squeeze_analyst import create_options_squeeze_analyst` to `tradingagents/agents/__init__.py` and `__all__`. Test import from package. (TDD: Red — test import; Green — add to __init__.py; Refactor.) [33ffa10]
 
-- [ ] Verification: Run `pytest tests/test_options_squeeze_agent.py -v`. Confirm agent follows exact same pattern as fundamentals_analyst. [checkpoint marker]
+- [x] Verification: Run `pytest tests/test_options_squeeze_agent.py -v`. Confirm agent follows exact same pattern as fundamentals_analyst. [checkpoint marker] [33ffa10]
 
 ---
 
@@ -88,21 +88,21 @@ Tasks:
 
 Tasks:
 
-- [ ] Task 5.1: Extend `AgentState` — add `options_squeeze_report` field. Test by instantiating state dict with the new field. (TDD: Red — test field exists in AgentState annotation; Green — add field; Refactor.)
+- [x] Task 5.1: Extend `AgentState` — add `options_squeeze_report` field. Test by instantiating state dict with the new field. (TDD: Red — test field exists in AgentState annotation; Green — add field; Refactor.) [817939d]
 
-- [ ] Task 5.2: Extend `Propagator.create_initial_state()` — add `"options_squeeze_report": ""` to initial state. Test that returned state includes the key. (TDD: Red — test key in initial state; Green — add to dict; Refactor.)
+- [x] Task 5.2: Extend `Propagator.create_initial_state()` — add `"options_squeeze_report": ""` to initial state. Test that returned state includes the key. (TDD: Red — test key in initial state; Green — add to dict; Refactor.) [817939d]
 
-- [ ] Task 5.3: Add `should_continue_options_squeeze` to `ConditionalLogic` — follows exact same pattern as `should_continue_fundamentals`. Test with mock state containing tool_calls returns `"tools_options_squeeze"`, without returns `"Msg Clear Options_squeeze"`. (TDD: Red — test both branches; Green — implement method; Refactor.)
+- [x] Task 5.3: Add `should_continue_options_squeeze` to `ConditionalLogic` — follows exact same pattern as `should_continue_fundamentals`. Test with mock state containing tool_calls returns `"tools_options_squeeze"`, without returns `"Msg Clear Options_squeeze"`. (TDD: Red — test both branches; Green — implement method; Refactor.) [817939d]
 
-- [ ] Task 5.4: Extend `GraphSetup.setup_graph()` — add `"options_squeeze"` handling block (create analyst node, delete node, tool node). Update default `selected_analysts` parameter to include `"options_squeeze"`. Test by calling `setup_graph()` and verifying the workflow has the new nodes. (TDD: Red — test node names in compiled graph; Green — add wiring block; Refactor.)
+- [x] Task 5.4: Extend `GraphSetup.setup_graph()` — add `"options_squeeze"` handling block (create analyst node, delete node, tool node). Update default `selected_analysts` parameter to include `"options_squeeze"`. Test by calling `setup_graph()` and verifying the workflow has the new nodes. (TDD: Red — test node names in compiled graph; Green — add wiring block; Refactor.) [817939d]
 
-- [ ] Task 5.5: Extend `TradingAgentsGraph._create_tool_nodes()` — add `"options_squeeze"` tool node with all 6 tools. Test the tool node dict has the new key. (TDD: Red — test key exists; Green — add ToolNode; Refactor.)
+- [x] Task 5.5: Extend `TradingAgentsGraph._create_tool_nodes()` — add `"options_squeeze"` tool node with all 6 tools. Test the tool node dict has the new key. (TDD: Red — test key exists; Green — add ToolNode; Refactor.) [817939d]
 
-- [ ] Task 5.6: Update `TradingAgentsGraph.__init__` default `selected_analysts` — add `"options_squeeze"`. Update `_log_state()` to include `options_squeeze_report` in the JSON output. Test log output contains the new field. (TDD: Red — test default includes new analyst, test log dict; Green — update defaults and log method; Refactor.)
+- [x] Task 5.6: Update `TradingAgentsGraph.__init__` default `selected_analysts` — add `"options_squeeze"`. Update `_log_state()` to include `options_squeeze_report` in the JSON output. Test log output contains the new field. (TDD: Red — test default includes new analyst, test log dict; Green — update defaults and log method; Refactor.) [817939d]
 
-- [ ] Task 5.7: Test backward compatibility — instantiate `TradingAgentsGraph(selected_analysts=["market", "fundamentals"])` (without options_squeeze). Assert graph compiles and does not contain options_squeeze nodes. (TDD: Red — test exclusion; Green — verify existing conditional logic handles it; Refactor.)
+- [x] Task 5.7: Test backward compatibility — instantiate `TradingAgentsGraph(selected_analysts=["market", "fundamentals"])` (without options_squeeze). Assert graph compiles and does not contain options_squeeze nodes. (TDD: Red — test exclusion; Green — verify existing conditional logic handles it; Refactor.) [817939d]
 
-- [ ] Verification: Run full test suite `pytest tests/ -v`. Verify no existing tests broken. Verify new analyst appears in default graph. [checkpoint marker]
+- [x] Verification: Run full test suite `pytest tests/ -v`. Verify no existing tests broken. Verify new analyst appears in default graph. [checkpoint marker] [817939d]
 
 ---
 
