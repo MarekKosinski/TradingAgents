@@ -84,7 +84,7 @@ class TestGraphCompilationWithAllAnalysts:
         node_names = set(workflow.nodes.keys())
 
         assert "Market Analyst" in node_names
-        assert "Social Analyst" in node_names
+        assert "Sentiment Analyst" in node_names
         assert "News Analyst" in node_names
         assert "Fundamentals Analyst" in node_names
         assert "Options_squeeze Analyst" in node_names
