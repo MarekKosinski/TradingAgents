@@ -1,6 +1,7 @@
 import json
 from dataclasses import dataclass
 from datetime import date
+from pathlib import Path
 
 # Forms that signal dilution capacity or activity (heuristic, no doc parsing).
 SHELF_FORMS = {"S-3", "S-3ASR", "S-1"}
@@ -45,12 +46,27 @@ class EdgarClient:
 
     def _load_cik_map(self) -> dict:
         if self._cik_map is None:
-            raw = json.loads(self._fetch(_COMPANY_TICKERS_URL, self._headers()))
+            raw = json.loads(self._read_cik_source())
             self._cik_map = {
                 row["ticker"].upper(): f"{int(row['cik_str']):010d}"
                 for row in raw.values()
             }
         return self._cik_map
+
+    def _read_cik_source(self) -> str:
+        """Return company_tickers.json text, caching it on disk to avoid
+        re-downloading ~1MB on every run. The cache is best-effort: a write
+        failure falls back to the live response."""
+        cache = Path(self.config.edgar_cache_dir) / "company_tickers.json"
+        if cache.exists():
+            return cache.read_text()
+        text = self._fetch(_COMPANY_TICKERS_URL, self._headers())
+        try:
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            cache.write_text(text)
+        except OSError:
+            pass  # caching is an optimization, not a requirement
+        return text
 
     def get_cik(self, ticker: str) -> str | None:
         return self._load_cik_map().get(ticker.upper())
