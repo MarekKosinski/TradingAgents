@@ -37,6 +37,17 @@ DISCOVERY  ->  TRIAGE / SCORE  ->  VERIFY (existing DD)  ->  DECIDE + SIZE + LOG
 (wide net)     (rank by signal)    (mechanics/thesis)        (exit rules, feedback)
 ```
 
+**Flags shape the trade, they don't just filter it.** Triage signals come in two
+kinds. A few are **hard gates** (e.g. confirmed pump-and-dump structure → drop). Most
+are **graded inputs that bend the *expression* at DECIDE + SIZE** rather than passing
+or rejecting a name. The dilution flag is the canonical example: instead of killing a
+candidate, it pushes the recommended play toward **short-dated over long-dated, shares
+or spreads over naked premium, smaller size, and a shorter hold horizon** — an active
+ATM bends harder than a dormant shelf. So a flagged name doesn't fall out of the
+funnel; it arrives at the decision stage **re-shaped** (e.g. "dilutable → 1-day gamma
+play, half size" instead of "multi-week squeeze hold"). VERIFY/DD therefore doesn't
+just score conviction — it selects the right expression *given* the flags.
+
 ### Two engines (different signal shapes)
 
 | | **Tactical engine** | **Thematic engine** |
@@ -208,8 +219,14 @@ Ranked by edge, with the supporting evidence:
 2. **Trap-avoidance (negative screens).** Post-GME research: meme strategies show
    **positive short-term, negative long-term alpha** → avoiding losers ≈ the whole
    game. Highest-ROI screens:
-   - **Dilution kill-switch** (EDGAR S-3/424B5/ATM): a company that can print
-     shares caps your squeeze. Almost no retail checks this.
+   - **Dilution flag — _flag, don't auto-kill_** (EDGAR S-3/424B5/ATM): a company
+     that can print shares **caps the upside ceiling and shortens the safe horizon**
+     — it does *not* mean "no trade." An **active ATM** (selling into strength now) is
+     far worse than a **dormant shelf** (capacity on file, unused). Treat it as a
+     **conviction penalty + horizon/sizing input**, not an exclusion: a flagged name
+     can still support a fast, short-dated expression (e.g. a 1-day gamma/options play
+     *before* dilution can realistically be executed) — just not a multi-week hold.
+     Almost no retail checks this.
    - **Pump-and-dump structure** (coordinated new/low-karma accounts, copypasta).
 3. **Thematic value-chain lead-lag.** When company A guides up on a driver, its
    suppliers/customers often **haven't repriced yet** — trade the laggard. The
@@ -257,7 +274,9 @@ real catalyst.**
   covered. Borrow availability/fee is paywalled.
 - **Bot/astroturf contamination** of mention counts; ticker-extraction false
   positives (`DD`, `CEO`, `YOLO`, `OPEN`) → need `$`-prefix + context words + stop-list.
-- **Dilution risk** silently kills squeezes — must be screened, not assumed.
+- **Dilution risk** caps squeezes and shortens their runway — must be **flagged and
+  weighted** (active ATM ≫ dormant shelf), not assumed; even flagged, a short-horizon
+  play may remain.
 - **Point-in-time data** is the hard part for backtesting (see §6).
 
 ### Execution / behavioral risks
@@ -323,6 +342,9 @@ real catalyst.**
 
 1. **EDGAR dilution/shelf + Form 4 insider screen** — free data, huge
    trap-avoidance value, nobody does it; slots into the existing squeeze analyst.
+   Emits a **graded dilution flag** (conviction penalty + shortened hold horizon /
+   smaller size), **not a binary exclude** — a flagged name can still support a fast,
+   short-dated play.
 2. **Social collector + acceleration/novelty scoring** over *feeder* subs (ApeWisdom
    + StockTwits) → also unlocks future backtesting of engine A.
 3. **FMP-fed theme detector** — phrase-emergence QoQ → value-chain basket.
@@ -347,6 +369,150 @@ real catalyst.**
       reuse per-ticker options tools as confirmation-only for now?
 - [ ] Political trades: **Quiver** API vs free Capitol Trades / STOCK Act scraping?
 - [ ] Risk rules: define default exit/stop/sizing policy to encode.
+
+---
+
+## 9. Application architecture
+
+The Radar is mostly **new code that wraps and reuses existing code**, not a rewrite.
+Key insight: the existing `TradingAgentsGraph.propagate(ticker, date)` **is** the
+VERIFY stage. The Radar is the inverse "*which* ticker?" engine in front of it, plus
+a feedback loop behind it.
+
+### Maps onto what exists today
+
+```
+EXISTING (reuse as-is)                    NEW (the Radar)
+─────────────────────                     ───────────────
+dataflows/  (yfinance, alpha_vantage,  ◄── collectors + signals call these
+            reddit, stocktwits,
+            y_finance_options)
+agents/.../options_squeeze_tools.py    ◄── confluence overlay (VERIFY)
+graph/trading_graph.py  .propagate()   ◄── VERIFY stage (run on survivors only)
+llm_clients/factory.py                 ◄── all LLM calls (theme detect, DD)
+default_config.py  data_vendors{}      ◄── extend with radar feed toggles
+```
+
+### Layered flow
+
+```
+                    ┌─────────────────────────────────────────────┐
+   SCHEDULER  ─────►│  tactical loop (min)   thematic loop (qtr)   │
+                    └─────────────────────────────────────────────┘
+                                      │
+   ① DISCOVERY      ┌──────────────────────────────────────────────┐
+   (collectors)     │ ApeWisdom · StockTwits · feeders · EDGAR ·    │
+                    │ FMP transcripts · (Unusual Whales)            │
+                    └──────────────────────────────────────────────┘
+                                      │ poll-and-store
+   ── STORE ──────► ┌──────────────────────────────────────────────┐
+                    │ SQLite: snapshots · signals · flags · alerts ·│
+                    │         outcomes   (the time series + memory) │
+                    └──────────────────────────────────────────────┘
+                                      │
+   ② TRIAGE/SCORE   ┌──────────────────────────────────────────────┐
+   (signals)        │ velocity(A) · mechanics(B) · dilution-flag ·  │
+                    │ insider(G) · theme(E) · botscore → composite  │
+                    │  → gates (hard) + flags (graded) + shaper      │
+                    └──────────────────────────────────────────────┘
+                                      │ shortlist (cheap filters first)
+   ③ VERIFY         ┌──────────────────────────────────────────────┐
+                    │ confluence overlays (options flow, insider) + │
+                    │ EXISTING TradingAgentsGraph.propagate()       │ ◄─ reuse
+                    └──────────────────────────────────────────────┘
+                                      │
+   ④ DECIDE+LOG     ┌──────────────────────────────────────────────┐
+                    │ brief (shaped play/size/stop/target) → human  │
+                    │ outcome logger → calibration (signal weights) │──┐
+                    └──────────────────────────────────────────────┘  │
+                                      └──── feedback re-weights ②  ◄────┘
+```
+
+Cost discipline is structural: **cheap screens run before expensive ones** — free
+EDGAR/velocity gates kill or shape candidates *before* the LLM-heavy `.propagate()`
+ever runs. That bounds the LLM bill (§2's biggest variable).
+
+### Module layout
+
+A new self-contained package alongside the existing ones:
+
+```
+tradingagents/radar/
+  collectors/          # ① DISCOVERY — each wraps a feed, all share a heartbeat
+    base.py            #   Collector ABC + health/last-success tracking
+    apewisdom.py       #   poll mainstream subs (free)
+    stocktwits_feed.py
+    feeders.py         #   niche subs / X / Discord (official APIs, optional)
+    edgar.py           #   S-3/424B5/ATM + Form 4   (step 1, free)
+    transcripts.py     #   FMP corpus pull          (engine E)
+    options_flow.py    #   Unusual Whales           (engine F, optional/paid)
+  store/
+    db.py              #   SQLite conn + migrations
+    models.py          #   snapshots, signals, flags, candidates, alerts, outcomes
+    repositories.py    #   typed read/write helpers
+  signals/             # ② TRIAGE/SCORE — pure functions over the store
+    velocity.py        #   acceleration off baseline + novelty (engine A)
+    mechanics.py       #   squeeze profile (engine B)  → reuses dataflows
+    dilution.py        #   GRADED flag: active ATM ≫ dormant shelf (step 1)
+    insider.py         #   Form 4 cluster buys (engine G)
+    political.py       #   congressional trades (engine G)
+    theme.py           #   phrase-emergence QoQ + FinBERT (engine E)
+    botscore.py        #   author concentration / copypasta (nice-to-have)
+    scoring.py         #   composite score + flag aggregation
+  triage/
+    funnel.py          #   orchestrates discovery→score→gate→shortlist
+    gates.py           #   HARD gates (pump structure → drop)
+    shaper.py          #   GRADED flags → expression/horizon/size hints
+  verify/
+    confluence.py      #   options confirm + insider overlay (reuse existing tools)
+    dd_runner.py       #   thin wrapper over TradingAgentsGraph.propagate()
+  decide/
+    brief.py           #   assemble the one-screen decision brief
+    policy.py          #   default exit/stop/target/sizing (§8 open decision)
+  feedback/
+    logger.py          #   alert + outcome → SQLite (step 6)
+    calibration.py     #   learn signal weights, prune dead signals
+  backtest/
+    harness.py         #   engines E & B (step 8)
+    pit.py             #   point-in-time / as-of data access
+  scheduler.py         #   tactical vs thematic cadence
+  health.py            #   dead-source alerting ("dead scraper ≠ no signal")
+  config.py            #   build/buy toggles + thresholds + feed creds
+  cli.py               #   `radar run` · `radar shortlist` · `radar backtest`
+```
+
+### Data model (SQLite — backbone *and* memory)
+
+| Table | Purpose | Key columns |
+|---|---|---|
+| `snapshots` | social time series (poll-and-store) | ts, source, ticker, mentions, mentions_dedup, rank, sentiment |
+| `signals` | per-ticker scored signals over time | ts, ticker, type, value, score, meta(json) |
+| `flags` | graded/hard flags | ts, ticker, type (`dilution_active_atm`…), severity |
+| `candidates` | survivors with lifecycle state | ticker, first_seen, status |
+| `alerts` | what fired, with shaped play | ts, ticker, composite, engine, shaped_play(json) |
+| `outcomes` | entry/exit/pnl for calibration | alert_id, entry, exit, pnl, notes |
+
+One store serves three roles: the velocity baseline (`snapshots`), the
+forward-test/backtest data (`alerts`+`outcomes`), and the calibration input
+(`signals`↔`outcomes`).
+
+### Cross-cutting principles
+
+- **Vendor abstraction mirrors the existing `data_vendors` config** — each "buy" feed
+  sits behind an interface with a free/cheap fallback, so build-vs-buy and the §8
+  open decisions are config flags, not rewrites (FMP↔EarningsCall, Ortex↔IBKR,
+  Unusual Whales on/off).
+- **Poll-and-store, not scrape** — collectors snapshot on a schedule; the time series
+  *is* the edge.
+- **Health/heartbeat on every source** (`health.py`) — §5's "a dead scraper looks
+  identical to no signal."
+- **Flags shape, gates drop** — `triage/shaper.py` turns graded flags (e.g. dilution)
+  into expression/horizon/size hints feeding `decide/`; only `triage/gates.py` removes
+  names.
+- **Point-in-time access for backtest** (`backtest/pit.py`) — no look-ahead,
+  survivorship-free.
+- **Two cadences, one funnel** — `scheduler.py` runs the tactical loop (minutes) and
+  thematic loop (quarterly) into the same triage→verify→decide path.
 
 ---
 
